@@ -16,8 +16,8 @@ class TravelCostDTO
         private ?string $startDate = null,
         #[Assert\Date]
         private ?string $payDate = null
-    )
-    {}
+    ) {
+    }
 
     public function getCost(): int
     {

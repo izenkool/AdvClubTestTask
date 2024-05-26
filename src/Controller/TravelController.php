@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Request\TravelCostDTO;
+use App\Service\Discount\EarlyBookingDiscountService;
 use App\Service\Discount\KidDiscountService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,17 +23,22 @@ class TravelController
     #[Route('/cost', name: 'app_travel_cost', methods: ['GET'])]
     public function cost(
         #[MapQueryString] TravelCostDTO $travelCostDTO,
-        KidDiscountService $kidDiscountService
+        KidDiscountService $kidDiscountService,
+        EarlyBookingDiscountService $earlyBookingDiscountService,
     ): JsonResponse {
         try {
             $birthDate = new \DateTimeImmutable($travelCostDTO->getBirthDate());
             $cost = $travelCostDTO->getCost() - $kidDiscountService->getDiscount($travelCostDTO->getCost(), $birthDate);
+
+            $startDate = $travelCostDTO->getStartDate() ? new \DateTimeImmutable($travelCostDTO->getStartDate()) : null;
+            $payDate = $travelCostDTO->getPayDate() ? new \DateTimeImmutable($travelCostDTO->getPayDate()) : null;
+            $cost = $cost - $earlyBookingDiscountService->getDiscount($cost, $startDate, $payDate);
         } catch (\Exception $exception) {
             $this->logger->error($exception->getMessage());
 
-            return new JsonResponse(["error" => $exception->getMessage()]);
+            return new JsonResponse(['error' => $exception->getMessage()]);
         }
 
-        return new JsonResponse(["cost" => $cost]);
+        return new JsonResponse(['cost' => $cost]);
     }
 }

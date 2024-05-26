@@ -5,6 +5,7 @@ namespace App\Service\Discount;
 class KidDiscountService
 {
     private \DateTimeImmutable $now;
+
     public function __construct()
     {
         $this->now = new \DateTimeImmutable();
@@ -15,7 +16,7 @@ class KidDiscountService
             'min' => 3,
             'max' => 6,
             'percent' => 80,
-            'max_sum' => null
+            'max_sum' => null,
         ],
         [
             'min' => 6,
@@ -54,6 +55,6 @@ class KidDiscountService
             break;
         }
 
-        return floor($discount);
+        return (int) $discount;
     }
 }
